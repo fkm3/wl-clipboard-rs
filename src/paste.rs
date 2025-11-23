@@ -52,6 +52,10 @@ pub enum MimeType<'a> {
     TextWithPriority(&'a str),
     /// Request a specific MIME type.
     Specific(&'a str),
+    /// Request a general MIME type, choosing the first matching offer.
+    ///
+    /// For example, `General("image")` matches "image/png".
+    General(&'a str),
 }
 
 /// Seat to operate on.
@@ -400,6 +404,9 @@ pub(crate) fn get_contents_internal(
             .or_else(|| take!(|x| x == "UTF8_STRING"))
             .or_else(|| take!(is_text)),
         MimeType::Specific(mime_type) => take!(|x| x == mime_type),
+        MimeType::General(mime_type) => take!(|x: &str| x
+            .strip_prefix(mime_type)
+            .is_some_and(|rest| rest.starts_with("/"))),
     };
 
     // Check if a suitable MIME type is copied.

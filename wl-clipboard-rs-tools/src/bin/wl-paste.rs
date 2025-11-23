@@ -62,7 +62,8 @@ fn main() -> Result<(), anyhow::Error> {
     // Do some smart MIME type selection.
     let mime_type = match options.mime_type {
         Some(ref mime_type) if mime_type == "text" => MimeType::Text,
-        Some(ref mime_type) => MimeType::Specific(mime_type),
+        Some(ref mime_type) if mime_type.contains("/") => MimeType::Specific(mime_type),
+        Some(ref mime_type) => MimeType::General(mime_type),
         None => {
             let inferred: Option<&str> = inferred.as_ref().map(Mime::as_ref);
             trace!("Inferred MIME type: {:?}", inferred);
